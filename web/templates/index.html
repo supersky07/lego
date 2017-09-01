@@ -1,0 +1,135 @@
+<!doctype html>
+    <head>
+        <title>Hello from Flask</title>
+        <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="//cdn.bootcss.com/sweetalert/1.1.3/sweetalert.min.css" />
+    </head>
+    <body>
+        {% if name %}
+            <h1>Hello {{ name }}!</h1>
+        {% else %}
+            <h1>Hello, World!</h1>
+        {% endif %}
+        <div id="container"></div>
+        <div id="line" style="width: 1024px; height: 400px"></div>
+
+        <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+        <script type="text/javascript" src="//cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="//cdn.bootcss.com/mustache.js/2.3.0/mustache.min.js"></script>
+        <script type="text/javascript" src="//cdn.bootcss.com/sweetalert/1.1.3/sweetalert.min.js"></script>
+        <script type="text/javascript" src="//cdn.bootcss.com/echarts/3.5.0/echarts.min.js"></script>
+
+        <script type="text/javascript">
+            var _this = {
+                data: {
+                    hope_data: []
+                }
+            };
+
+            var bindDomEventFun = function() {
+                $('#container').delegate("li", "click", function(e) {
+                    var hope_index = $(e.target).attr('data-val');
+                    tools.getPriceByChannels(_this.data.hope_data[hope_index].channels);
+                });
+            };
+
+            var initPluginsFun = function() {
+                tools.getUsersData();
+            };
+
+            /* 工具方法区*/
+            var tools = {
+                getUsersData: function() {
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/get/hope/37e91baa227488c7",
+                        data: {},
+                        success: function(json){
+                            if (json.code == 100000) {
+                                var hope_arr = json.data;
+                                _this.data.hope_data = hope_arr;
+
+                                var res = '<ul>';
+
+                                for (var i = 0; i < hope_arr.length; i++) {
+                                    res += '<li data-val=' + i + '>' + hope_arr[i].hope_name + '</li>';    
+                                }
+
+                                res += '</ul>';
+
+                                $("#container").html(res);
+                            } else {
+                                sweetAlert("Oops...", json.msg, "error");
+                            }
+                        },
+                        error: function(data) {
+                            sweetAlert("Oops...", '出错啦，待会再试！', "error");
+                        }
+                    });
+                },
+                getPriceByChannels: function(channels) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/get/price",
+                        data: {
+                            channels: channels.join(',')
+                        },
+                        success: function(json){
+                            if (json.code == 100000) {
+                                tools.drawLine(json.data);
+                            } else {
+                                sweetAlert("Oops...", json.msg, "error");
+                            }
+                        },
+                        error: function(data) {
+                            sweetAlert("Oops...", '出错啦，待会再试！', "error");
+                        }
+                    });
+                },
+                drawLine: function(opts) {
+                    /*
+                    * title: 图表标题/string
+                    * series: 图表纵坐标/array
+                    * id: 图表渲染的容器id/string
+                    */
+                    var option = {
+                        title: {
+                            text: opts.title
+                        },
+                        tooltip: {
+                            trigger: 'axis'
+                        },
+                        legend: {
+                            data: opts.legend
+                        },
+                        toolbox: {
+                            
+                        },
+                        xAxis: {
+                            type: 'category',
+                            data: opts.labels,
+                            formatter: function(d) {
+                                return new Date(d);
+                            }
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: opts.series.reverse()
+                    };
+
+                    var myChart = echarts.init(document.getElementById("line"));
+                    myChart.setOption(option);
+                }
+            };
+
+            var init = function() {
+                bindDomEventFun();
+                initPluginsFun();
+            };
+
+            init();
+        </script>
+    </body>
+</html>
+    
