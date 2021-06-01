@@ -74,7 +74,7 @@ scipy==0.13.0b1
 selenium==3.5.0
 singledispatch==3.4.0.3
 six==1.4.1
-urllib3==1.22
+urllib3==1.26.5
 vboxapi==1.0
 virtualenv==15.0.1
 virtualenv-clone==0.2.6
