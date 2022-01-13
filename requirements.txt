@@ -25,7 +25,7 @@ networkx==1.11
 numpy==1.8.0rc1
 olefile==0.44
 pbr==1.8.1
-Pillow==4.2.1
+Pillow==9.0.0
 py2app==0.7.3
 pylint==1.7.2
 pymongo==3.5.1
